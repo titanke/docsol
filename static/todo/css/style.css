@@ -1,0 +1,17 @@
+h1 {
+    color: rgb(181, 238, 24);
+    }
+    a:link, a:visited {
+        color: black;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+      }
+      
+      .errorlist {
+        list-style: none;
+    }
+
+    .bootstrap-datetimepicker-widget.dropdown-menu {
+        width: 400px; /* Cambia esto al ancho que desees */
+    }

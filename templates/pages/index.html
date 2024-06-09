@@ -1,0 +1,207 @@
+
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+
+{% block extrastyle %}
+
+<style>
+  .bootstrap-datetimepicker-widget.dropdown-menu {
+      width: auto; /* Restablece el ancho a su valor predeterminado */
+      max-width: 500px; /* Limita el ancho máximo */
+
+  }
+  .bootstrap-datetimepicker-widget table td,
+.bootstrap-datetimepicker-widget table th {
+    margin: 0;
+    padding: 0.5em;  /* Ajusta este valor para cambiar el espaciado */
+}
+  </style>
+{% endblock extrastyle %}
+
+<!doctype html>
+<html lang="en">
+  {% block content %}
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+  <!-- <p>  for the calander I use the code until the end of head tag</p> -->
+  
+    <!-- Bootstrap 4 -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+    <!-- Font Awesome -->
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <!-- Moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment.min.js" integrity="sha256-VBLiveTKyUZMEzJd6z2mhfxIqz3ZATCuVMawPZGzIfA=" crossorigin="anonymous"></script>
+
+    <!-- Tempus Dominus Bootstrap 4 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" integrity="sha256-XPTBwC3SBoWHSmKasAk01c08M6sIA5gF5+sRxqak2Qs=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js" integrity="sha256-z0oKYg6xiLq3yJGsp/LsY9XykbweQlHl42jHv2XTBz4=" crossorigin="anonymous"></script>
+
+    <!-- moadal -->
+
+
+  </head>
+
+
+  <body>
+    
+<link rel="stylesheet" type="text/css" href="{% static 'todo/css/style.css' %}">
+
+          <div class="container">
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Agregar nueva tarea</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <form method='POST' action="">
+                      {%csrf_token%}
+                      <div class="mb-3">
+                        <label class="form-label">Tarea</label> {{form.task}}
+                      </div>
+                      <div class="mb-3">
+                        <label for="" class="form-label">Completado</label>
+                        {{form.completed}}
+                      </div>
+                      <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+                        <label for="" class="form-label">Fecha de entrega</label>   {{ form.comletiondate }}
+                        <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker" >
+                          <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                      </div>
+                      <strong style="color: red;"> {{ form.errors.comletiondate }}</strong>
+
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <input type="submit" name="Task" class="btn btn-success">
+                      </div>
+                    </form>
+                  </div>
+                 
+                </div>
+              </div>
+            </div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">Actualizar tarea</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="card">
+          <div class="card-body">
+            <form method='POST' action="">
+              {%csrf_token%}
+              <div class="mb-3">
+                <label class="form-label">Tarea</label> {{form.task}}
+              </div>
+              <div class="mb-3">
+                <label for="" class="form-label">Completado</label>
+                {{form.completed}}
+              </div>
+              <div class="mb-3">
+                <label for="" class="form-label">Fecha de entrega</label>
+                {{form.comletiondate}}
+              </div>
+              <input type="submit" name="Task" class="btn btn-success">
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+          <div class="card">
+            
+              <div class="card-body">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                  <h4>Lista de tareas</h4>
+                  {% if request.user.is_authenticated and request.user.is_superuser %}
+
+                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    Agregar nueva tarea
+                  </button>
+                  {%endif%}
+
+                </div>
+                
+                  
+                  <table class="table">
+                    <thead class="table">
+                      <tr>
+                        <th scope="col">Tareas</th>
+                        <th scope="col">Tiempo restante</th>
+                        <th scope="col">Estado</th>
+                        {% if request.user.is_authenticated and request.user.is_superuser %}
+
+                        <th scope="col">Acciones</th> <!-- Nueva columna de Acciones -->
+                      </tr>
+                      {%endif%}
+
+                    </thead>
+          <div>
+          <tr>
+            {% for task in todo %}
+            <tbody class="table">
+              <td>{{task.task}} </td>
+              {%if task.completed %}
+              <td>----</td>
+              <td> <button class="btn btn-success"><a href="{% url 'uncompleted' task.id %}">Completado</a></button></td>
+              {%else%}
+              <td>{{task.comletiondate|timeuntil}}</td>
+              <td> <button class="btn btn-danger"><a href="{% url 'completed' task.id %}">No completado</a></button></td>
+              {%endif%}
+              {% if request.user.is_authenticated and request.user.is_superuser %}
+
+              <td>
+          
+            <button class="btn btn-warning" style="background: none; border: none;"><a href="{% url 'update' task.id %}"><i class="fa fa-pencil"></i></a></button>
+            <button class="btn btn-danger" style="background: none; border: none;"><a href="{% url 'delete' task.id %}">                    <i title="Borrar" class="fa-solid fa-trash text-danger"></i>
+
+    
+            </a></button>
+              </td>
+              {%endif%}
+
+            </tbody>
+            {%endfor%}
+          </table>
+          <br>
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+          </div> 
+      </div> 
+</div> 
+
+
+</body>
+{% endblock content %}
+
+</html>
+
+
+{% block extrascripts %}
+  <script>
+    $(function () {
+      $("#datetimepicker1").datetimepicker({
+        format: 'DD/MM/YYYY HH:mm:s',
+      });
+    });
+  </script>
+{% endblock extrascripts %}

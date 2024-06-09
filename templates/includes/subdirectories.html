@@ -1,0 +1,73 @@
+{% load static file_extension %}
+
+{% for subdirectory in directory.directories %}
+        {% if subdirectory.directories %}
+            {% if request.user.is_superuser%}  
+                <li 
+                    id="collapse{{directory.id}}" 
+                    class="ms-{{depth}} collapse show"
+                >
+                    <i class="fa-solid fa-folder"></i>
+                    <a 
+                        data-bs-toggle="collapse" 
+                        href="#collapse{{subdirectory.id}}" 
+                        role="button" 
+                        aria-expanded="false" 
+                        aria-controls="collapse{{subdirectory.id}}"
+                        onclick="window.location.href = '{% url 'file_manager' subdirectory.path|encoded_path %}';"
+                    >
+                        {{ subdirectory.name }}
+                    </a>
+                </li>
+                {% include 'includes/subdirectories.html' with directory=subdirectory depth=depth|add:"2" %}
+            {% else %}
+            {% for group in request.user.groups.all %}
+              {% if subdirectory.name == group.name%}
+              <li 
+              id="collapse{{directory.id}}" 
+              class="ms-{{depth}} collapse show"
+          >
+              <i class="fa-solid fa-folder"></i>
+              <a 
+                  data-bs-toggle="collapse" 
+                  href="#collapse{{subdirectory.id}}" 
+                  role=https://www.practicas.pe/oferta-convocatoria-012-practicante-division-tecnica-aduanera-recaudacion-contabilidad-sunat-puno-34760.html"button" 
+                  aria-expanded="false" 
+                  aria-controls="collapse{{subdirectory.id}}"
+                  onclick="window.location.href = '{% url 'file_manager' subdirectory.path|encoded_path %}';"
+              >
+                  {{ subdirectory.name }}
+              </a>
+          </li>
+          {% include 'includes/subdirectories.html' with directory=subdirectory depth=depth|add:"2" %}
+              {% endif %}
+            {% endfor %}
+
+            {% endif %}
+
+        {% else %}
+            {% if request.user.is_superuser %}  
+                <li 
+                    id="collapse{{directory.id}}" 
+                    class="ms-{{depth}} collapse show"
+                >
+                    <i class="fa-solid fa-folder"></i>
+                    <a href="{% url 'file_manager' subdirectory.path|encoded_path %}">{{ subdirectory.name }}</a>
+                </li>
+            {% else %}
+            {% for group in request.user.groups.all %}
+                {% if subdirectory.name == group.name %}
+                <li 
+                id="collapse{{directory.id}}" 
+                class="ms-{{depth}} collapse show"
+            >
+                <i class="fa-solid fa-folder"></i>
+                <a href="{% url 'file_manager' subdirectory.path|encoded_path %}">{{ subdirectory.name }}</a>
+            </li>
+                {% endif %}
+            {% endfor %}
+
+            {% endif %}
+        {% endif %}
+
+{% endfor %}

@@ -1,0 +1,8 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <div style="background-color: rgb(15, 23, 42); height: 100vh; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+    <h1 style="color: white;">No tienes acceso a esta carpeta</h1>
+    <a href="{% url 'file_manager' %}" class="btn btn-primary">Regresar al administrador de archivos</a>
+  </div>
+{% endblock %}

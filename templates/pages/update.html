@@ -1,0 +1,43 @@
+{% extends 'layouts/base.html' %}
+
+{% load static %}
+<!doctype html>
+<html lang="en">
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>To Do App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+  </head>
+
+  {% block content %}
+  <body>
+    <link rel="stylesheet" type="text/css" href="{% static 'todo/css/style.css' %}">
+    <div class="container">
+    <br>
+    <div class="card">
+      <div class="card-body">
+          <form method='POST' action="">
+          {%csrf_token%}
+          <div class="mb-3">
+              <h5>Actualizar tarea</h5>
+          <label class="form-label">Tarea</label> {{form.task}}  </div>
+            <div class="mb-3">
+              <label for="" class="form-label">Completado</label>
+              {{form.completed}} </div>
+            <div class="mb-3">
+                  <label for="" class="form-label">Fecha de entrega</label>
+                  {{form.comletiondate}}</div>
+              <input type="submit" name="Task" class="btn btn-success">
+          </form>
+        </div>
+    </div>
+    <br>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+    </div> 
+    </body>
+    {% endblock content %}
+
+</html>

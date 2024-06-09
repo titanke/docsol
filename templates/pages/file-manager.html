@@ -1,0 +1,284 @@
+{% extends 'layouts/base.html' %}
+{% load static file_extension info_value %}
+
+{% block extrastyle %}
+<style>
+  ul li {
+    list-style-type: none;
+  }
+  .dot-separator {
+    height: 2px;
+    width: 2px;
+    background: #000;
+    border-radius: 50%;
+  }
+  .actions span {
+    cursor: pointer;
+  }
+  .modal {
+    z-index: 99999 !important;
+  }
+  form {
+    padding: 10px;
+}
+
+</style>
+{% endblock extrastyle %}
+
+
+{% block content %}
+<div class="container-fluid py-4 px-5">
+  <div class="row">
+    <div class="col-lg-3 border py-2">
+      
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          {% for breadcrumb in breadcrumbs %}
+         
+            {% if forloop.last %}
+              <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb.name }}</li>
+            {% else %}
+           
+                <li class="breadcrumb-item"><a href="{{ breadcrumb.url }}">{{ breadcrumb.name }}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ol>
+      </nav>
+
+
+      <!-- directorios //-->
+      <ul class="">
+        {% for directory in directories %}
+          {% if directory.directories %}
+          <li class="">
+            <i class="fa-solid fa-folder"></i>
+            <a 
+              data-bs-toggle="collapse" 
+              href="#collapse{{directory.id}}" 
+              role="button" 
+              aria-expanded="false"
+              aria-controls="collapse{{directory.id}}"
+              onclick="window.location.href = '{% url 'file_manager' directory.path|encoded_path %}';"
+            >
+              {{ directory.name }}
+            </a>
+          </li>
+          {% include 'includes/subdirectories.html' with directory=directory depth=depth|add:"3" %}
+        {% else %}
+          <li>
+            <i class="fa-solid fa-folder"></i>
+            <a href="{% url 'file_manager' directory.path|encoded_path %}">{{ directory.name }}</a>
+          </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+
+
+      <!-- fin //-->
+
+    </div>
+    <div class="col-lg-9 border py-2">
+      <div class="d-flex justify-content-start mb-3">
+        <label for="fileInput">
+          {% if request.user.is_authenticated  %}
+
+          <i class="fa-solid fa-upload text-primary fs-3"></i>
+          {% endif %}
+
+        </label>
+        <form method="post" action="{% url 'upload_file' %}" id="upload-file" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="directory" value="{{ selected_directory }}">
+          <input id="fileInput" class="d-none" onchange="submitForm()" type="file" name="file" required>
+        </form>
+        
+  
+      <!-- agre carpet //-->
+     
+      {% if request.user.is_authenticated and request.user.is_superuser %}
+      <form method="post" action="{% url 'mk_dir' %}" id="make-directory" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="directory" value="{{ selected_directory }}">
+        <input type="text" name="folder_name">
+        <input type="submit" value="Crear carpeta">
+      </form>
+      
+      <form method="post" action="{% url 'delete_dir' %}" id="delete-directory" enctype="multipart/form-data" onsubmit="return confirmDelete()">
+        {% csrf_token %}
+        <input type="hidden" name="directory" value="{{ selected_directory }}">
+        <input type="submit" value="Borrar carpeta">
+      </form>
+
+      {% endif %}
+      <!-- fin //-->
+
+      </div> 
+    
+
+   
+      {% if files %}
+        {{files|length|json_script:"files-count"}}
+        <div class="table-responsive">
+          <table class="table">
+            <tr>
+              <th scope="col">Nombre de Archivo</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Fecha de Subida</th> 
+              <th scope="col">Acciones</th>
+            </tr>
+            {% for file in files %}
+            <tr data-bs-toggle="tooltip" title="{{file.file_path|info_value}}">
+              <td>
+                <span>
+                  {{ file.filename }}
+                </span>
+              </td>
+              <td>{{ file.filename|file_extension|cut:"."|upper }}</td>
+              <td>{{ file.upload_date }}</td> <!-- Nueva celda -->
+
+              <td>
+                <div class="d-flex align-items-center actions">
+                  <span data-bs-toggle="modal" data-bs-target="#info-{{forloop.counter}}">
+                    <i title="Info" class="fa-solid fa-info text-success"></i>
+                  </span>
+                  <div class="dot-separator mx-2"></div>
+                  <span data-bs-toggle="modal" data-bs-target="#file-{{forloop.counter}}">
+                    <i title="Vista" class="fa-solid fa-eye text-primary"></i>
+                  </span>
+                  <div class="dot-separator mx-2"></div>
+                  <span data-bs-toggle="modal" data-bs-target="#delete-{{forloop.counter}}">
+                    <i title="Borrar" class="fa-solid fa-trash text-danger"></i>
+                  </span>
+
+
+                </div>
+              </td>
+            </tr>
+            
+          
+            <!-- Modal -->
+            <div class="modal fade" id="file-{{forloop.counter}}" data-bs-backdrop="static" data-bs-keyboard="false"
+              tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ file.filename }}</h1>
+                    <span>
+                      <a href="{% url 'download_file' file.file|encoded_file_path %}">
+                        <i title="Descargar" class="fa-solid fa-download text-success fs-4"></i>
+                      </a>
+                    </span>
+                    <div class="" id="modal-close-btn-{{forloop.counter}}" data-bs-dismiss="modal" aria-label="Close">
+                      <i class="fa-solid fa-circle-xmark fs-5"></i>
+                    </div>
+                  </div>
+
+                    <div class="modal-body">
+                      {% if file.filename|file_extension in ".jpg, .png, .gif, .jpeg" %}
+                        <img height="700px" class="w-100" src="/media/{{ file.file }}" alt="df">
+                      {% elif file.filename|file_extension in ".mp4, .webm, .ogg" %}
+                        <video class="w-100" height="700" controls>
+                          <source src="/media/{{ file.file }}" type="video/mp4">
+                        </video>
+                      {% elif file.filename|file_extension in ".pdf, .txt" %}
+                        <iframe src="/media/{{ file.file  }}" width="100%" height="700px"></iframe>
+                      {% elif file.filename|file_extension in ".csv" %}
+                        <pre class="bg-dark text-light p-3">{{ file.csv_text }}</pre>
+                      {% endif %}
+                    </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Delete Modal -->
+            <div class="modal fade" id="delete-{{forloop.counter}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Borrar Archivo</h1>
+                  </div>
+                  <div class="modal-body">
+                    {{file.filename}}
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a class="btn btn-danger" href="{% url 'delete_file' file.file|encoded_file_path %}">Aceptar</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Info Modal -->
+            <div class="modal fade" id="info-{{forloop.counter}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Informacion</h1>
+                    <div class="" id="modal-close-btn-{{forloop.counter}}" data-bs-dismiss="modal" aria-label="Close">
+                      <i class="fa-solid fa-circle-xmark fs-5"></i>
+                    </div>
+                  </div>
+                  <div class="modal-body">
+                    <form action="{% url 'save_info' file.file_path|encoded_file_path %}" method="post">
+                      {% csrf_token %}
+                      <div class="form-group mb-2">
+                        <label for="" class="form-label">Informacion</label>
+                        <input type="text" value="{{file.file_path|info_value}}" name="info" id="" class="form-control">
+                      </div>
+                      <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Guardar</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {% endfor %}
+          </table>
+        </div>
+      {% else %}
+        <p>No hay archivos</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock content %}
+
+{% block extrascripts %}
+
+<script> 
+  function submitForm() {
+    document.getElementById("upload-file").submit();
+  }
+
+
+window.onload = function() {
+  var directory = document.getElementById('directory').value;
+  document.getElementById("delete-directory").addEventListener("submit", function(event){
+      if(!confirm('¿Estás seguro de que quieres borrar la carpeta' + directory + '?')){
+          event.preventDefault();
+      }
+  });
+}
+
+document.getElementById("delete-directory").addEventListener("click", function(event){
+
+  if(!confirm('¿Estás seguro de que quieres borrar esta carpeta?')){
+      event.preventDefault();
+  }
+});
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' || event.key === 'Esc' || event.key === 27) {
+      let files = document.getElementById('files-count').textContent;
+      for (let i = 1; i <= files; i++) {
+        let closeButtonElements = document.getElementById(`modal-close-btn-${i}`);
+        closeButtonElements.click();
+      }
+    }
+  })
+</script>
+
+{% endblock extrascripts %}
+
