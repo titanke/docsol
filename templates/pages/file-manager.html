@@ -86,12 +86,24 @@
           {% endif %}
 
         </label>
+
+        <label for="fileouput">
+          {% if request.user.is_authenticated  %}
+          <i class="fa-solid fa-download text-primary fs-3"></i>
+          {% endif %}
+
+        </label>
         <form method="post" action="{% url 'upload_file' %}" id="upload-file" enctype="multipart/form-data">
           {% csrf_token %}
           <input type="hidden" name="directory" value="{{ selected_directory }}">
-          <input id="fileInput" class="d-none" onchange="submitForm()" type="file" name="file" required>
+          <input id="fileInput" class="d-none" onchange="submitForm()" type="file" name="file[]" multiple required>        
         </form>
         
+        <form method="post" action="{% url 'download_all' %}">
+          {% csrf_token %}
+          <input type="hidden" name="directory" value="{{ selected_directory }}">
+          <input id="fileouput" class="d-none" type="submit" >        
+        </form>
   
       <!-- agre carpet //-->
      
@@ -123,6 +135,7 @@
             <tr>
               <th scope="col">Nombre de Archivo</th>
               <th scope="col">Tipo</th>
+              <th scope="col">Tamaño</th>
               <th scope="col">Fecha de Subida</th> 
               <th scope="col">Acciones</th>
             </tr>
@@ -134,6 +147,7 @@
                 </span>
               </td>
               <td>{{ file.filename|file_extension|cut:"."|upper }}</td>
+              <td>{{ file.size|floatformat:2 }} MB</td> <!-- Nueva celda -->
               <td>{{ file.upload_date }}</td> <!-- Nueva celda -->
 
               <td>

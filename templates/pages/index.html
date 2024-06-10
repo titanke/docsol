@@ -9,13 +9,31 @@
   .bootstrap-datetimepicker-widget.dropdown-menu {
       width: auto; /* Restablece el ancho a su valor predeterminado */
       max-width: 500px; /* Limita el ancho máximo */
-
   }
-  .bootstrap-datetimepicker-widget table td,
+
+.bootstrap-datetimepicker-widget table td,
 .bootstrap-datetimepicker-widget table th {
     margin: 0;
     padding: 0.5em;  /* Ajusta este valor para cambiar el espaciado */
 }
+.card-body table td:nth-child(2) { /* Target the "Detalles" column */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.table-container {
+  overflow-x: auto;
+  
+}
+.wrapword{
+  white-space: pre-wrap;      /* CSS3 */   
+  white-space: -moz-pre-wrap; /* Firefox */    
+  white-space: -pre-wrap;     /* Opera <7 */   
+  white-space: -o-pre-wrap;   /* Opera 7 */    
+  word-wrap: break-word;      /* IE */
+  width: 200px;  /* Ajusta este valor a tus necesidades */
+
+}
+
   </style>
 {% endblock extrastyle %}
 
@@ -27,7 +45,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
-  <!-- <p>  for the calander I use the code until the end of head tag</p> -->
   
     <!-- Bootstrap 4 -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
@@ -44,10 +61,10 @@
     <!-- Tempus Dominus Bootstrap 4 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" integrity="sha256-XPTBwC3SBoWHSmKasAk01c08M6sIA5gF5+sRxqak2Qs=" crossorigin="anonymous" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js" integrity="sha256-z0oKYg6xiLq3yJGsp/LsY9XykbweQlHl42jHv2XTBz4=" crossorigin="anonymous"></script>
-
-    <!-- moadal -->
-
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- modal -->
   </head>
 
 
@@ -70,6 +87,12 @@
                         <label class="form-label">Tarea</label> {{form.task}}
                       </div>
                       <div class="mb-3">
+                        <label class="form-label">Detalle</label> {{form.details}}
+                      </div>
+                      <div class="mb-3">
+                        <div class="mb-3">
+                          <label class="form-label">Observacion</label> {{form.obs}}
+                        </div>
                         <label for="" class="form-label">Completado</label>
                         {{form.completed}}
                       </div>
@@ -91,9 +114,7 @@
                 </div>
               </div>
             </div>
-
-
-
+  
 <!-- Modal -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -126,8 +147,6 @@
     </div>
   </div>
 </div>
-
-
           <div class="card">
             
               <div class="card-body">
@@ -139,16 +158,18 @@
                     Agregar nueva tarea
                   </button>
                   {%endif%}
-
                 </div>
-                
-                  
-                  <table class="table">
+                <button id="browserPrint">Descargar tareas</button>
+              <div class="table-container">
+
+                  <table class="table" id="tare">
                     <thead class="table">
                       <tr>
                         <th scope="col">Tareas</th>
+                        <th scope="col2">Detalles</th>
                         <th scope="col">Tiempo restante</th>
                         <th scope="col">Estado</th>
+                        <th scope="col">Observacion</th>
                         {% if request.user.is_authenticated and request.user.is_superuser %}
 
                         <th scope="col">Acciones</th> <!-- Nueva columna de Acciones -->
@@ -156,33 +177,39 @@
                       {%endif%}
 
                     </thead>
-          <div>
-          <tr>
-            {% for task in todo %}
-            <tbody class="table">
-              <td>{{task.task}} </td>
-              {%if task.completed %}
-              <td>----</td>
-              <td> <button class="btn btn-success"><a href="{% url 'uncompleted' task.id %}">Completado</a></button></td>
-              {%else%}
-              <td>{{task.comletiondate|timeuntil}}</td>
-              <td> <button class="btn btn-danger"><a href="{% url 'completed' task.id %}">No completado</a></button></td>
-              {%endif%}
-              {% if request.user.is_authenticated and request.user.is_superuser %}
+                  <div>
+                  <tr>
+                    {% for task in todo %}
+                    <tbody class="table">
+                      <td>{{task.task}} </td>
+                      <td class="wrapword">{{task.details}}</td>
 
-              <td>
+                      {%if task.completed %}
+                      <td>----</td>
+                      <td> <button class="btn btn-success"><a href="{% url 'uncompleted' task.id %}">Completado</a></button></td>
+                      {%else%}
+                      <td>{{task.comletiondate|timeuntil}}</td>
+                      <td> <button class="btn btn-danger"><a href="{% url 'completed' task.id %}">No completado</a></button></td>
+                      {%endif%}
+                      <td>{{task.obs}} </td>
+
+                      {% if request.user.is_authenticated and request.user.is_superuser %}
+
+                      <td>
+      
+                    <button class="btn btn-warning" style="background: none; border: none;"><a href="{% url 'update' task.id %}"><i class="fa fa-pencil"></i></a></button>
+                    <button class="btn btn-danger" style="background: none; border: none;"><a href="{% url 'delete' task.id %}">                    <i title="Borrar" class="fa-solid fa-trash text-danger"></i>
           
-            <button class="btn btn-warning" style="background: none; border: none;"><a href="{% url 'update' task.id %}"><i class="fa fa-pencil"></i></a></button>
-            <button class="btn btn-danger" style="background: none; border: none;"><a href="{% url 'delete' task.id %}">                    <i title="Borrar" class="fa-solid fa-trash text-danger"></i>
-
-    
-            </a></button>
-              </td>
-              {%endif%}
-
-            </tbody>
-            {%endfor%}
+                    </a>
+                  </button>
+                      </td>
+                  {%endif%}
+                </tbody>
+              {%endfor%}
           </table>
+
+        </div>
+
           <br>
           <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
           </div> 
@@ -195,7 +222,6 @@
 
 </html>
 
-
 {% block extrascripts %}
   <script>
     $(function () {
@@ -203,5 +229,70 @@
         format: 'DD/MM/YYYY HH:mm:s',
       });
     });
+    
+function exportTableToPDF() {
+  var doc = new jsPDF();
+  var table = document.querySelector('table');
+  var rows = Array.from(table.rows);
+  var y = 20; // Starting position for table content
+  var x = 10; // Starting position for each table row
+
+  // Set font size and line height for spacing
+  doc.setFontSize(8);
+  var lineHeight = doc.getLineHeight();
+
+  rows.forEach(function(row) {
+    var columns = Array.from(row.cells);
+    columns.forEach(function(cell) {
+      // Position cell text and add spacing between letters
+      doc.text(x, y, cell.innerText, { characterSpacing: 2 }); 
+
+      // Calculate cell width for better spacing
+      var cellWidth = doc.getTextWidth(cell.innerText) + 5;
+
+      // Adjust x-position for next cell
+      x += cellWidth;
+    });
+
+    // Reset x-position for next row
+    x = 10;
+
+    // Add line height for spacing between rows
+    y += lineHeight;
+  });
+  doc.save('table.pdf');
+}
+
+function downloadPDFWithBrowserPrint() {
+  window.print();
+}
+document.querySelector('#browserPrint').addEventListener('click', downloadPDFWithBrowserPrint);
+
+function downloadPDFWithjsPDF() {
+  var doc = new jsPDF('p', 'pt', 'a4');
+  doc.html(document.querySelector('#tab'), {
+    callback: function (doc) {
+      doc.save('MLB World Series Winners.pdf');
+    },
+    margin: [60, 60, 60, 60],
+    x: 32,
+    y: 32,
+  });
+}
+
+document.querySelector('#jsPDF').addEventListener('click', downloadPDFWithjsPDF);
+
+// Code for browser print button (from previous example)
+function downloadPDFWithBrowserPrint() {
+  window.print();
+}
+
+document.querySelector('#browserPrint').addEventListener('click', downloadPDFWithBrowserPrint);
+
+const taskDetailsCell = document.querySelector('td:nth-child(2)'); 
+
+if (taskDetailsCell.offsetWidth > maximumWidth) {
+  taskDetailsCell.classList.add('word-wrap');
+}
   </script>
 {% endblock extrascripts %}

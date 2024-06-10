@@ -12,7 +12,8 @@ urlpatterns = [
     path('mk-dir/', views.mk_dir, name='mk_dir'),
     path('delete-dir/', views.delete_dir, name='delete_dir'),
     path('save-info/<str:file_path>/', views.save_info, name='save_info'),
-    
+    path('download_all/', views.download_all, name='download_all'),
+
     
     path('task/', views.tasks, name='task'),
     path('<int:pk>', views.delete, name='delete'),

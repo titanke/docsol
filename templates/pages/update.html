@@ -22,10 +22,20 @@
           {%csrf_token%}
           <div class="mb-3">
               <h5>Actualizar tarea</h5>
-          <label class="form-label">Tarea</label> {{form.task}}  </div>
+          <label class="form-label">Tarea</label> {{form.task}}  
+        </div>
+
+              <div class="mb-3">
+            <label class="form-label">Detalle</label> {{form.details}}  
+          </div>
+
+          <div class="mb-3">
+          <label class="form-label">Observacion</label> {{form.obs}}  
+        </div>
             <div class="mb-3">
               <label for="" class="form-label">Completado</label>
-              {{form.completed}} </div>
+              {{form.completed}} 
+            </div>
             <div class="mb-3">
                   <label for="" class="form-label">Fecha de entrega</label>
                   {{form.comletiondate}}</div>

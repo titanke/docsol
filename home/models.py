@@ -13,8 +13,10 @@ class FileInfo(models.Model):
     
 class Task(models.Model):
     task=models.CharField(max_length=50, null=True)
+    details=models.CharField(max_length=100, null=True)
     completed=models.BooleanField(default=False)
     comletiondate = models.DateTimeField(auto_now_add=False, null=True)
+    obs=models.CharField(max_length=100, null=True)
     def __str__(self):
         return self.task
     class Meta:
