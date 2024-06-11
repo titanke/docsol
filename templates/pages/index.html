@@ -6,6 +6,11 @@
 {% block extrastyle %}
 
 <style>
+
+  body {
+     }
+
+  
   .bootstrap-datetimepicker-widget.dropdown-menu {
       width: auto; /* Restablece el ancho a su valor predeterminado */
       max-width: 500px; /* Limita el ancho máximo */
@@ -24,13 +29,80 @@
   overflow-x: auto;
   
 }
-.wrapword{
-  white-space: pre-wrap;      /* CSS3 */   
-  white-space: -moz-pre-wrap; /* Firefox */    
-  white-space: -pre-wrap;     /* Opera <7 */   
-  white-space: -o-pre-wrap;   /* Opera 7 */    
-  word-wrap: break-word;      /* IE */
-  width: 200px;  /* Ajusta este valor a tus necesidades */
+
+table {
+  width: 100%;
+  background: white;
+  margin-bottom: 1.25em;
+  border: solid 1px #dddddd;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+table tr th,
+table tr td {
+  padding: 0.5625em 0.625em;
+  font-size: 0.875em;
+  color: #222222;
+  border: 1px solid #dddddd;
+}
+
+table tr.even,
+table tr.alt,
+table tr:nth-of-type(even) {
+  background: #f9f9f9;
+}
+@media only screen and (max-width: 768px) {
+	table.resp,
+	.resp thead,
+	.resp tbody,
+	.resp tr,
+	.resp th,
+	.resp td,
+	.resp caption {
+	  display: block;
+	}
+	
+	table.resp {
+	  border: none
+	}
+	
+	.resp thead tr {
+	  display: none;
+	}
+	
+	.resp tbody tr {
+	  margin: 1em 0;
+	  border: 1px solid #2ba6cb;
+	}
+	
+	.resp td {
+	  border: none;
+	  border-bottom: 1px solid #dddddd;
+	  position: relative;
+	  padding-left: 45%;
+	  text-align: left;
+	}
+	
+	.resp tr td:last-child {
+	  border-bottom: 1px double #dddddd;
+	}
+	
+	.resp tr:last-child td:last-child {
+	  border: none;
+	}
+	
+	.resp td:before {
+	  position: absolute;
+	  top: 6px;
+	  left: 6px;
+	  width: 45%;
+	  padding-right: 10px;
+	  white-space: nowrap;
+	  text-align: left;
+	  font-weight: bold;
+	}
+
 
 }
 
@@ -152,17 +224,20 @@
               <div class="card-body">
                 <div class="card-body d-flex justify-content-between align-items-center">
                   <h4>Lista de tareas</h4>
-                  {% if request.user.is_authenticated and request.user.is_superuser %}
-
-                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    Agregar nueva tarea
-                  </button>
+                  
+                  <div >
+                    {% if request.user.is_authenticated and request.user.is_superuser %}
+                      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        Agregar nueva tarea
+                      </button>
                   {%endif%}
+                  <button id="browserPrint" class="btn btn-primary">Descargar tareas</button>
                 </div>
-                <button id="browserPrint">Descargar tareas</button>
+
+                </div>
               <div class="table-container">
 
-                  <table class="table" id="tare">
+                  <table class="resp" id="tare" >
                     <thead class="table">
                       <tr>
                         <th scope="col">Tareas</th>
@@ -182,7 +257,7 @@
                     {% for task in todo %}
                     <tbody class="table">
                       <td>{{task.task}} </td>
-                      <td class="wrapword">{{task.details}}</td>
+                      <td>{{task.details}}</td>
 
                       {%if task.completed %}
                       <td>----</td>
@@ -230,69 +305,13 @@
       });
     });
     
-function exportTableToPDF() {
-  var doc = new jsPDF();
-  var table = document.querySelector('table');
-  var rows = Array.from(table.rows);
-  var y = 20; // Starting position for table content
-  var x = 10; // Starting position for each table row
 
-  // Set font size and line height for spacing
-  doc.setFontSize(8);
-  var lineHeight = doc.getLineHeight();
-
-  rows.forEach(function(row) {
-    var columns = Array.from(row.cells);
-    columns.forEach(function(cell) {
-      // Position cell text and add spacing between letters
-      doc.text(x, y, cell.innerText, { characterSpacing: 2 }); 
-
-      // Calculate cell width for better spacing
-      var cellWidth = doc.getTextWidth(cell.innerText) + 5;
-
-      // Adjust x-position for next cell
-      x += cellWidth;
-    });
-
-    // Reset x-position for next row
-    x = 10;
-
-    // Add line height for spacing between rows
-    y += lineHeight;
-  });
-  doc.save('table.pdf');
-}
 
 function downloadPDFWithBrowserPrint() {
   window.print();
 }
 document.querySelector('#browserPrint').addEventListener('click', downloadPDFWithBrowserPrint);
 
-function downloadPDFWithjsPDF() {
-  var doc = new jsPDF('p', 'pt', 'a4');
-  doc.html(document.querySelector('#tab'), {
-    callback: function (doc) {
-      doc.save('MLB World Series Winners.pdf');
-    },
-    margin: [60, 60, 60, 60],
-    x: 32,
-    y: 32,
-  });
-}
 
-document.querySelector('#jsPDF').addEventListener('click', downloadPDFWithjsPDF);
-
-// Code for browser print button (from previous example)
-function downloadPDFWithBrowserPrint() {
-  window.print();
-}
-
-document.querySelector('#browserPrint').addEventListener('click', downloadPDFWithBrowserPrint);
-
-const taskDetailsCell = document.querySelector('td:nth-child(2)'); 
-
-if (taskDetailsCell.offsetWidth > maximumWidth) {
-  taskDetailsCell.classList.add('word-wrap');
-}
   </script>
 {% endblock extrascripts %}
